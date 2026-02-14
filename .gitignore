@@ -1,51 +1,52 @@
 # Virtual Environment
-  venv/
-  env/
-  ENV/
+venv/
+env/
+ENV/
+.env
 
-  # Python
-  __pycache__/
-  *.py[cod]
-  *$py.class
-  *.so
-  .Python
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-  # Distribution / packaging
-  build/
-  dist/
-  *.egg-info/
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
 
-  # Data files (contains your personal tasks)
-  data/
-  *.jsonl
-  *.json
+# Data files (contains your personal tasks)
+data/
+*.jsonl
+*.json
 
-  # Environment variables
-  .env
-  .env.local
+# Environment variables
+.env
+.env.local
 
-  # IDE
-  .vscode/
-  .idea/
-  *.swp
-  *.swo
-  *~
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-  # OS
-  .DS_Store
-  Thumbs.db
+# OS
+.DS_Store
+Thumbs.db
 
-  # Jupyter Notebook
-  .ipynb_checkpoints/
+# Jupyter Notebook
+.ipynb_checkpoints/
 
-  # Claude Code
-  .claude/
+# Claude Code
+.claude/
 
-  # Logs
-  *.log
+# Logs
+*.log
 
-  # Testing
-  .pytest_cache/
-  .coverage
-  htmlcov/
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
 

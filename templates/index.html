@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}MyTasks - Task List{% endblock %}
+
+{% block content %}
+<div class="task-list-container">
+    <div class="action-bar">
+        <button onclick="showAddTaskModal()" class="btn btn-primary">Add Task</button>
+    </div>
+
+    <!-- Historical Tasks Section -->
+    <section class="task-section historical-section">
+        <h2>Historical Tasks</h2>
+        <div class="tasks">
+            {% if tasks.historical %}
+                {% for task in tasks.historical %}
+                <div class="task-item historical" data-task-id="{{ task.id }}">
+                    <div class="task-header">
+                        <input type="checkbox" checked disabled class="task-checkbox">
+                        <span class="task-title">{{ task.title }}</span>
+                        <span class="task-type-badge" style="background-color: {{ config.task_types[task.type].color if task.type in config.task_types else '#4A90E2' }}">
+                            {{ task.type }}
+                        </span>
+                        <span class="task-date">{{ task.finish_date }}</span>
+                        <button onclick="showEditTaskModal('{{ task.id }}')" class="btn-icon" title="Edit task">✏️</button>
+                        <button onclick="toggleTaskDetails('{{ task.id }}')" class="btn-icon">▼</button>
+                    </div>
+                    <div id="details-{{ task.id }}" class="task-details hidden">
+                        {% if task.time_estimate %}
+                        <div class="task-meta">
+                            <strong>Time Estimate:</strong> {{ task.time_estimate }}
+                        </div>
+                        {% endif %}
+                        {% if task.notes %}
+                        <div class="task-meta">
+                            <strong>Notes:</strong> {{ task.notes }}
+                        </div>
+                        {% endif %}
+                        {% if task.links %}
+                        <div class="task-meta">
+                            <strong>Links:</strong>
+                            <ul class="task-links">
+                                {% for link in task.links %}
+                                <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        {% if task.subtasks %}
+                        <div class="task-meta">
+                            <strong>Subtasks:</strong>
+                            <ul class="subtask-list">
+                                {% for subtask in task.subtasks %}
+                                <li>
+                                    <input type="checkbox" {% if subtask.completed %}checked{% endif %} disabled>
+                                    <span {% if subtask.completed %}class="completed"{% endif %}>{{ subtask.title }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-message">No historical tasks yet.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Current Tasks Section -->
+    <section id="current-tasks" class="task-section current-section">
+        <h2>Current Tasks</h2>
+        <div class="tasks">
+            {% if tasks.current %}
+                {% for task in tasks.current %}
+                <div class="task-item current" data-task-id="{{ task.id }}">
+                    <div class="task-header">
+                        <input type="checkbox" onclick="handleTaskComplete('{{ task.id }}')" class="task-checkbox">
+                        <span class="task-title">{{ task.title }}</span>
+                        <span class="task-type-badge" style="background-color: {{ config.task_types[task.type].color if task.type in config.task_types else '#4A90E2' }}">
+                            {{ task.type }}
+                        </span>
+                        {% if task.time_estimate %}
+                        <span class="task-time">{{ task.time_estimate }}</span>
+                        {% endif %}
+                        <button onclick="showEditTaskModal('{{ task.id }}')" class="btn-icon" title="Edit task">✏️</button>
+                        <button onclick="toggleTaskDetails('{{ task.id }}')" class="btn-icon">▼</button>
+                    </div>
+                    <div id="details-{{ task.id }}" class="task-details hidden">
+                        {% if task.start_date %}
+                        <div class="task-meta">
+                            <strong>Started:</strong> {{ task.start_date }}
+                        </div>
+                        {% endif %}
+                        {% if task.notes %}
+                        <div class="task-meta">
+                            <strong>Notes:</strong> {{ task.notes }}
+                        </div>
+                        {% endif %}
+                        {% if task.links %}
+                        <div class="task-meta">
+                            <strong>Links:</strong>
+                            <ul class="task-links">
+                                {% for link in task.links %}
+                                <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <div class="task-meta">
+                            <strong>Subtasks:</strong>
+                            <ul class="subtask-list">
+                                {% for subtask in task.subtasks %}
+                                <li>
+                                    <input type="checkbox" {% if subtask.completed %}checked{% endif %}
+                                           onclick="toggleSubtask('{{ task.id }}', '{{ subtask.id }}')">
+                                    <span {% if subtask.completed %}class="completed"{% endif %}>{{ subtask.title }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <button onclick="showAddSubtaskModal('{{ task.id }}')" class="btn btn-small">Add Subtask</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-message">No current tasks. Move tasks from backlog to get started!</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Backlog Section -->
+    <section class="task-section backlog-section">
+        <h2>Backlog</h2>
+        <div class="tasks">
+            {% if tasks.backlog %}
+                {% for task in tasks.backlog %}
+                <div class="task-item backlog" data-task-id="{{ task.id }}">
+                    <div class="task-header">
+                        <span class="task-title">{{ task.title }}</span>
+                        <span class="task-type-badge" style="background-color: {{ config.task_types[task.type].color if task.type in config.task_types else '#4A90E2' }}">
+                            {{ task.type }}
+                        </span>
+                        {% if task.time_estimate %}
+                        <span class="task-time">{{ task.time_estimate }}</span>
+                        {% endif %}
+                        <button onclick="moveToCurrentTask('{{ task.id }}')" class="btn btn-small">Start</button>
+                        <button onclick="showEditTaskModal('{{ task.id }}')" class="btn-icon" title="Edit task">✏️</button>
+                        <button onclick="toggleTaskDetails('{{ task.id }}')" class="btn-icon">▼</button>
+                    </div>
+                    <div id="details-{{ task.id }}" class="task-details hidden">
+                        {% if task.notes %}
+                        <div class="task-meta">
+                            <strong>Notes:</strong> {{ task.notes }}
+                        </div>
+                        {% endif %}
+                        {% if task.links %}
+                        <div class="task-meta">
+                            <strong>Links:</strong>
+                            <ul class="task-links">
+                                {% for link in task.links %}
+                                <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-message">No backlog tasks. Add new tasks to get started!</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<!-- Add Task Modal -->
+<div id="addTaskModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Task</h3>
+            <button onclick="closeModal('addTaskModal')" class="btn-close">×</button>
+        </div>
+        <form id="addTaskForm" onsubmit="handleAddTask(event)">
+            <div class="form-group">
+                <label for="taskTitle">Title *</label>
+                <input type="text" id="taskTitle" required>
+            </div>
+            <div class="form-group">
+                <label for="taskType">Type</label>
+                <select id="taskType">
+                    {% for type_name in config.task_types %}
+                    <option value="{{ type_name }}">{{ type_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="taskStatus">Status</label>
+                <select id="taskStatus">
+                    <option value="backlog">Backlog</option>
+                    <option value="current">Current</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="taskTimeEstimate">Time Estimate</label>
+                <input type="text" id="taskTimeEstimate" placeholder="e.g., 2h, 3 days">
+            </div>
+            <div class="form-group">
+                <label for="taskNotes">Notes</label>
+                <textarea id="taskNotes" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="taskLinks">Links (one per line)</label>
+                <textarea id="taskLinks" rows="2"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeModal('addTaskModal')" class="btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Subtask Modal -->
+<div id="addSubtaskModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Subtask</h3>
+            <button onclick="closeModal('addSubtaskModal')" class="btn-close">×</button>
+        </div>
+        <form id="addSubtaskForm" onsubmit="handleAddSubtask(event)">
+            <input type="hidden" id="subtaskTaskId">
+            <div class="form-group">
+                <label for="subtaskTitle">Subtask Title *</label>
+                <input type="text" id="subtaskTitle" required>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeModal('addSubtaskModal')" class="btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add Subtask</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div id="editTaskModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Task</h3>
+            <button onclick="closeModal('editTaskModal')" class="btn-close">×</button>
+        </div>
+        <form id="editTaskForm" onsubmit="handleEditTask(event)">
+            <input type="hidden" id="editTaskId">
+            <div class="form-group">
+                <label for="editTaskTitle">Title *</label>
+                <input type="text" id="editTaskTitle" required>
+            </div>
+            <div class="form-group">
+                <label for="editTaskType">Type</label>
+                <select id="editTaskType">
+                    {% for type_name in config.task_types %}
+                    <option value="{{ type_name }}">{{ type_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editTaskTimeEstimate">Time Estimate</label>
+                <input type="text" id="editTaskTimeEstimate" placeholder="e.g., 2h, 3 days">
+            </div>
+            <div class="form-group">
+                <label for="editTaskNotes">Notes</label>
+                <textarea id="editTaskNotes" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="editTaskLinks">Links (one per line)</label>
+                <textarea id="editTaskLinks" rows="2"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeModal('editTaskModal')" class="btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-scroll to current tasks on page load
+window.addEventListener('DOMContentLoaded', function() {
+    const currentSection = document.getElementById('current-tasks');
+    if (currentSection) {
+        currentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+});
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

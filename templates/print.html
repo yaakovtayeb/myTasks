@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTasks - Print View</title>
+    <style>
+        @media print {
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 12pt;
+                line-height: 1.4;
+                color: #000;
+                background: #fff;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 24pt;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 18pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .task-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            page-break-inside: avoid;
+        }
+
+        .task-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .task-type {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            font-size: 10pt;
+            margin-left: 10px;
+        }
+
+        .task-meta {
+            margin-top: 5px;
+            font-size: 10pt;
+        }
+
+        .subtask-list, .task-links {
+            margin: 5px 0 5px 20px;
+            padding: 0;
+        }
+
+        .subtask-list li {
+            list-style-type: none;
+            margin: 3px 0;
+        }
+
+        .task-links li {
+            margin: 3px 0;
+        }
+
+        .empty-message {
+            font-style: italic;
+            color: #666;
+        }
+
+        .print-button {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print print-button">
+        <button onclick="window.print()" class="btn">Print</button>
+        <button onclick="window.close()" class="btn">Close</button>
+    </div>
+
+    <h1>MyTasks</h1>
+    <p>Generated: {{ now }}</p>
+
+    <section>
+        <h2>Current Tasks</h2>
+        {% if tasks.current %}
+            {% for task in tasks.current %}
+            <div class="task-item">
+                <div class="task-header">
+                    ☐ {{ task.title }}
+                    <span class="task-type">{{ task.type }}</span>
+                    {% if task.time_estimate %}
+                    <span class="task-time">({{ task.time_estimate }})</span>
+                    {% endif %}
+                </div>
+                {% if task.start_date %}
+                <div class="task-meta">Started: {{ task.start_date }}</div>
+                {% endif %}
+                {% if task.notes %}
+                <div class="task-meta">Notes: {{ task.notes }}</div>
+                {% endif %}
+                {% if task.links %}
+                <div class="task-meta">
+                    Links:
+                    <ul class="task-links">
+                        {% for link in task.links %}
+                        <li>{{ link }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                {% if task.subtasks %}
+                <div class="task-meta">
+                    Subtasks:
+                    <ul class="subtask-list">
+                        {% for subtask in task.subtasks %}
+                        <li>{% if subtask.completed %}☑{% else %}☐{% endif %} {{ subtask.title }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">No current tasks.</p>
+        {% endif %}
+    </section>
+
+    {% if include_backlog %}
+    <section>
+        <h2>Backlog</h2>
+        {% if tasks.backlog %}
+            {% for task in tasks.backlog %}
+            <div class="task-item">
+                <div class="task-header">
+                    ☐ {{ task.title }}
+                    <span class="task-type">{{ task.type }}</span>
+                    {% if task.time_estimate %}
+                    <span class="task-time">({{ task.time_estimate }})</span>
+                    {% endif %}
+                </div>
+                {% if task.notes %}
+                <div class="task-meta">Notes: {{ task.notes }}</div>
+                {% endif %}
+                {% if task.links %}
+                <div class="task-meta">
+                    Links:
+                    <ul class="task-links">
+                        {% for link in task.links %}
+                        <li>{{ link }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">No backlog tasks.</p>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <script>
+        // Auto-trigger print dialog
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
