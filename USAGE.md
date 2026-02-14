@@ -276,6 +276,120 @@ pip install -r requirements.txt
 - **Storage**: JSONL files (local filesystem)
 - **Middleware**: Werkzeug ProxyFix (for reverse proxy compatibility)
 
+## Git Version Control
+
+### Initial Setup
+
+1. **Initialize Git repository**:
+   ```bash
+   cd myTasks
+   git init
+   ```
+
+2. **Create .gitignore** (to exclude personal data and virtual environment):
+   ```bash
+   cat > .gitignore << 'EOF'
+   # Virtual Environment
+   venv/
+   env/
+
+   # Python
+   __pycache__/
+   *.py[cod]
+
+   # Data files (personal tasks)
+   data/
+   *.jsonl
+   *.json
+
+   # Environment variables
+   .env
+
+   # IDE and OS
+   .vscode/
+   .DS_Store
+
+   # Jupyter
+   .ipynb_checkpoints/
+
+   # Claude Code
+   .claude/
+   EOF
+   ```
+
+3. **Make initial commit**:
+   ```bash
+   git add .
+   git commit -m "Initial commit: MyTasks application"
+   ```
+
+4. **Create remote repository** on GitHub, GitLab, or Bitbucket (set as Private)
+
+5. **Add remote and push**:
+   ```bash
+   # Replace with your repository URL
+   git remote add origin https://github.com/YOUR_USERNAME/myTasks.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+### Credential Caching
+
+To avoid entering username/password repeatedly, use credential caching:
+
+```bash
+# Cache credentials for 1 hour
+git config --global credential.helper 'cache --timeout=3600'
+
+# Or cache for 8 hours (28800 seconds)
+git config --global credential.helper 'cache --timeout=28800'
+```
+
+**First push**: Enter credentials once
+**Subsequent pushes**: No credentials needed within timeout period
+
+### Daily Workflow
+
+```bash
+# Check what changed
+git status
+
+# Stage changes
+git add .
+
+# Commit with message
+git commit -m "Description of changes"
+
+# Push to remote
+git push
+
+# Pull latest changes (if working from multiple machines)
+git pull
+```
+
+### Useful Git Commands
+
+```bash
+# View commit history
+git log --oneline
+
+# View changes
+git diff
+
+# Undo unstaged changes
+git checkout -- filename.py
+
+# Clear credential cache
+git credential-cache exit
+
+# Check current credential setting
+git config --global credential.helper
+```
+
+### Security Note
+
+The `.gitignore` file ensures your personal task data (`data/` directory) and credentials (`.env` file) are never pushed to the remote repository. Only application code is version controlled.
+
 ## License
 
 Personal use application.
